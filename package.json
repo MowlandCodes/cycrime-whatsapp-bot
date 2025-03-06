@@ -1,17 +1,23 @@
 {
   "name": "cycrime_whatsapp_bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "Whatsapp Bot for CyCrime Community",
+  "keywords": [
+    "whatsapp-bot"
+  ],
+  "homepage": "https://github.com/MowlandCodes/cycrime-whatsapp-bot#readme",
+  "bugs": {
+    "url": "https://github.com/MowlandCodes/cycrime-whatsapp-bot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MowlandCodes/cycrime-whatsapp-bot.git"
+  },
+  "license": "ISC",
+  "author": "MowlandCodes",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.16",
-    "qrcode-terminal": "^0.12.0"
   }
 }
