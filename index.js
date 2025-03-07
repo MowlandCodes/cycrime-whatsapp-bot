@@ -46,10 +46,24 @@ async function connect_to_whatsapp() {
     // Handle incoming messages
     sock.ev.on("messages.upsert", async (m) => {
         const message = m.messages[0];
-        const senderJID = message.key.remoteJid;
-        const sender = message.key.participant || senderJID;
+        const senderJID = message.key.remoteJid; // Group ID
+        const sender = message.key.participant || senderJID; // Sender's JID
+
+        // Skip non-group messages
+        if (!senderJID) return;
 
         if (message.message?.conversation?.startsWith(".bot_tag_all")) {
+            // Checking for Cooldown
+            const now = Date.now();
+
+            if (COOLDOWN[senderJID] && now < COOLDOWN[senderJID]) {
+                const remaining = Math.ceil((COOLDOWN[senderJID] - now) / 1000);
+                await sock.sendMessage(senderJID, {
+                    text: `⏳ *Command is on cooldown!* Try again in *${remaining}* seconds.`,
+                });
+                return;
+            }
+
             // Check whether the sender is a group admin
             const group_metadata = await sock.groupMetadata(senderJID);
             const is_admin = group_metadata.participants.some(
@@ -64,12 +78,15 @@ async function connect_to_whatsapp() {
                 return;
             }
 
+            // Update Cooldown
+            COOLDOWN[senderJID] = now + 120 * 1000;
+
             const members = group_metadata.participants.map((p) => p.id);
             const names = group_metadata.participants.map(
                 (p) => p.name || p.id.split("@")[0],
             );
 
-            const message_to_send = `*Tag semua member di grup ini*
+            const message_to_send = `*🔔 Tag semua member di grup ini 🔔*
 
 ${names.map((name, index) => `@${members[index].split("@")[0]} ( ${name} )`).join("\n")}
 
@@ -104,26 +121,25 @@ ${names.map((name, index) => `@${members[index].split("@")[0]} ( ${name} )`).joi
                 const group_metadata = await sock.groupMetadata(group_jid);
                 const group_name = group_metadata.subject; // Stands for group name
 
-                const welcome_message = `
-👋 * Selamat Datang di CyCrime Community! * 👋
+                const welcome_message = `👋 *Selamat Datang di CyCrime Community!* 👋
 
-Komunitas IT yang fokus pada * Cyber Security 🔒 & Programming 💻.Beginner - friendly,* semua dipersilakan bergabung!
+Komunitas IT yang fokus pada *Cyber Security 🔒 & Programming 💻.Beginner - friendly,* semua dipersilakan bergabung!
 
-📌 * Struktur Komunitas * :
+📌 *Struktur Komunitas* :
 
-            1️⃣ * CyCrime Community</>* : Diskusi umum seputar IT, Cyber Security, & Programming.
-2️⃣ * Ngoding Santuy * : Sharing & belajar coding dengan santai.
-3️⃣ * CyCrime Promosi * : Media promosi jasa, lowongan kerja, & info bermanfaat lainnya.
+1️⃣ *CyCrime Community</>* : Diskusi umum seputar IT, Cyber Security, & Programming.
+2️⃣ *Ngoding Santuy* : Sharing & belajar coding dengan santai.
+3️⃣ *CyCrime Promosi* : Media promosi jasa, lowongan kerja, & info bermanfaat lainnya.
 
 💬 Mari Berdiskusi & Berkembang Bersama!
-                * Silahkan Perkenalkan dirimu dengan format berikut * :
+*Silahkan Perkenalkan dirimu dengan format berikut* :
 
-✅ * Nama:*
-✅ * Domisili:*
-✅ * Minat:*
-✅ * Harapan di grup ini:*
+✅ *Nama:*
+✅ *Domisili:*
+✅ *Minat:*
+✅ *Harapan di grup ini:*
 
-🚀 * Stay active & enjoy the journey! * `;
+🚀 *Stay active & enjoy the journey!* `;
 
                 console.log(welcome_message);
                 console.log("\n\n\x1b[92mMessage sent successfully!\x1b[0m");
