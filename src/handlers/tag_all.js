@@ -1,3 +1,4 @@
+const config = require("../config.js");
 const COOLDOWN = {};
 
 module.exports = (sock) => {
@@ -9,7 +10,9 @@ module.exports = (sock) => {
         // Skip non-group messages
         if (!senderJID) return;
 
-        if (message.message?.conversation?.startsWith(".bot_tag_all")) {
+        if (
+            message.message?.conversation?.startsWith(`${config.BOT_PREFIX}tag_all`)
+        ) {
             // Checking for Cooldown
             const now = Date.now();
 
